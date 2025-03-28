@@ -9,7 +9,7 @@ import EmojiEvents from "@mui/icons-material/EmojiEvents";
 import Draggable from "react-draggable";
 import type { FlavorEnum, TicketData } from "./index";
 import { useAppDispatch } from "../../store";
-import { shiftTicketUp } from "../../state";
+import { shiftTicketDown, shiftTicketUp } from "../../state";
 
 const TicketIcon = ({ type }: { type: FlavorEnum }) => {
   switch (type) {
@@ -32,18 +32,12 @@ const displayId = (id: number, type: FlavorEnum) => {
   return `${prefix}-${id.toString().padStart(3, "0")}`;
 };
 
-const cardMoveY = (movedDown: boolean) => {
-  if (movedDown) {
-  } else {
-    useAppDispatch(shiftTicketUp);
-  }
-};
-
 // rough estimate
 const cardHeight = 100;
 
 export const Ticket = ({ id, title, type, assignee, points }: TicketData) => {
   const ref = React.useRef<HTMLDivElement>(null);
+  const dispatch = useAppDispatch();
   return (
     <>
       <Draggable
@@ -52,21 +46,25 @@ export const Ticket = ({ id, title, type, assignee, points }: TicketData) => {
         onDrag={(e, { y }) => {
           if (ref && ref.current) {
             ref.current.style.zIndex = "99";
-            const isCardMoved = cardHeight / 2 < Math.abs(y);
-            if (isCardMoved) {
-              console.log(
-                "hello it moved ",
-                y > 0 ? "down" : "up",
-                "based on ",
-                y
-              );
-              cardMoveY(y > 0);
-            }
           }
         }}
-        onStop={() => {
+        onStop={(e, { y }) => {
           if (ref && ref.current) {
             ref.current.style.zIndex = "0";
+            const isCardMoved = cardHeight / 2 < Math.abs(y);
+            if (isCardMoved) {
+              // console.log(
+              //   "hello it moved ",
+              //   y > 0 ? "down" : "up",
+              //   "based on ",
+              //   y
+              // );
+              if (y > 0) {
+                dispatch(shiftTicketDown(id));
+              } else {
+                dispatch(shiftTicketUp(id));
+              }
+            }
           }
         }}
         //typescript, tis a silly place

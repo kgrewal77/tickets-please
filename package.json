@@ -2,27 +2,32 @@
   "name": "react-typescript",
   "version": "1.0.0",
   "description": "React and TypeScript example starter project",
-  "keywords": ["typescript", "react", "starter"],
+  "keywords": [
+    "typescript",
+    "react",
+    "starter"
+  ],
   "main": "src/index.tsx",
   "dependencies": {
     "@emotion/react": "latest",
     "@emotion/styled": "latest",
+    "@fontsource/inter": "latest",
     "@mui/base": "latest",
     "@mui/icons-material": "latest",
     "@mui/joy": "latest",
     "@mui/material": "latest",
+    "@reduxjs/toolkit": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "typescript": "latest",
-    "@fontsource/inter": "latest",
-    "react-helmet": "latest",
     "react-draggable": "latest",
+    "react-helmet": "latest",
     "react-redux": "latest",
-    "@reduxjs/toolkit": "latest"
+    "typescript": "latest"
   },
   "devDependencies": {
+    "@types/react-helmet": "^6.1.11",
     "react-scripts": "latest"
   },
   "scripts": {
@@ -31,5 +36,10 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "browserslist": [">0.2%", "not dead", "not ie <= 11", "not op_mini all"]
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
