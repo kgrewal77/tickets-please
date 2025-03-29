@@ -28,7 +28,8 @@
   },
   "devDependencies": {
     "@types/react-helmet": "^6.1.11",
-    "react-scripts": "latest"
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "react-scripts": "^5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",

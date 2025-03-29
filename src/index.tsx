@@ -1,19 +1,18 @@
+import "@fontsource/inter";
+
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
-import { Helmet } from "react-helmet";
-import "@fontsource/inter";
-import { store } from "./store";
 import { Provider } from "react-redux";
+
+import App from "./App";
+import { store } from "./store";
 
 const rootElement = document.getElementById("root")!;
 const root = ReactDOM.createRoot(rootElement);
 
 root.render(
   <React.StrictMode>
-    <Helmet>
-      <meta name="viewport" content="initial-scale=1, width=device-width" />
-    </Helmet>
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
     <Provider store={store}>
       <App />
     </Provider>

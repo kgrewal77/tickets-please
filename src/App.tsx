@@ -1,9 +1,11 @@
 import "./styles.css";
-import * as React from "react";
-import { CssVarsProvider, useColorScheme } from "@mui/joy/styles";
-import Select from "@mui/joy/Select";
-import Option from "@mui/joy/Option";
+
 import { Box } from "@mui/joy";
+import Option from "@mui/joy/Option";
+import Select from "@mui/joy/Select";
+import { CssVarsProvider, useColorScheme } from "@mui/joy/styles";
+import * as React from "react";
+
 import { TicketBoard } from "./components/ticket";
 
 function ModeToggle() {

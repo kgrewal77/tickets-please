@@ -1,15 +1,22 @@
-import * as React from "react";
-import Typography from "@mui/joy/Typography";
-import { Card, CardContent, Stack } from "@mui/joy";
-import Person from "@mui/icons-material/Person";
-import BugReport from "@mui/icons-material/BugReport";
-import FlashOn from "@mui/icons-material/FlashOn";
 import Book from "@mui/icons-material/Book";
+import BugReport from "@mui/icons-material/BugReport";
 import EmojiEvents from "@mui/icons-material/EmojiEvents";
+import FlashOn from "@mui/icons-material/FlashOn";
+import Person from "@mui/icons-material/Person";
+import { Card, CardContent, Stack } from "@mui/joy";
+import Typography from "@mui/joy/Typography";
+import type { RefObject } from "react";
+import { useRef } from "react";
 import Draggable from "react-draggable";
-import type { FlavorEnum, TicketData } from "./index";
-import { useAppDispatch } from "../../store";
+
 import { shiftTicketDown, shiftTicketUp } from "../../state";
+import { useAppDispatch } from "../../store";
+import type { FlavorEnum, TicketData } from "./index";
+
+type TicketProps = TicketData & {
+  couldSwap: boolean;
+  onCouldSwap: (offset: number) => void;
+};
 
 const TicketIcon = ({ type }: { type: FlavorEnum }) => {
   switch (type) {
@@ -32,53 +39,68 @@ const displayId = (id: number, type: FlavorEnum) => {
   return `${prefix}-${id.toString().padStart(3, "0")}`;
 };
 
-// rough estimate
-const cardHeight = 100;
-
-export const Ticket = ({ id, title, type, assignee, points }: TicketData) => {
-  const ref = React.useRef<HTMLDivElement>(null);
+export const Ticket = ({
+  id,
+  title,
+  type,
+  assignee,
+  points,
+  couldSwap,
+  onCouldSwap,
+}: TicketProps) => {
+  const ref = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
+  const cardHeight = 130;
+
   return (
     <>
       <Draggable
         defaultPosition={{ x: 0, y: 0 }}
         position={{ x: 0, y: 0 }}
+        axis="y"
+        bounds="parent"
         onDrag={(e, { y }) => {
           if (ref && ref.current) {
             ref.current.style.zIndex = "99";
+            const offset = Math.round(Math.abs(y) / cardHeight);
+            if (offset > 0) {
+              if (y > 0) {
+                onCouldSwap(offset);
+              } else {
+                onCouldSwap(-offset);
+              }
+            } else {
+              onCouldSwap(0);
+            }
           }
         }}
         onStop={(e, { y }) => {
           if (ref && ref.current) {
             ref.current.style.zIndex = "0";
-            const isCardMoved = cardHeight / 2 < Math.abs(y);
-            if (isCardMoved) {
-              // console.log(
-              //   "hello it moved ",
-              //   y > 0 ? "down" : "up",
-              //   "based on ",
-              //   y
-              // );
+            const offset = Math.round(Math.abs(y) / cardHeight);
+            if (offset > 0) {
               if (y > 0) {
-                dispatch(shiftTicketDown(id));
+                dispatch(shiftTicketDown({ id, offset }));
+                onCouldSwap(0);
               } else {
-                dispatch(shiftTicketUp(id));
+                dispatch(shiftTicketUp({ id, offset }));
+                onCouldSwap(0);
               }
             }
           }
         }}
         //typescript, tis a silly place
-        nodeRef={ref as React.RefObject<HTMLDivElement>}
+        nodeRef={ref as RefObject<HTMLDivElement>}
       >
         <div ref={ref}>
           <Card
             variant="solid"
             sx={(theme) => ({
-              my: "1vh",
+              my: 1,
               mx: "auto",
-              opacity: 1,
               borderRadius: "var(--joy-radius-md)",
               width: 300,
+              height: cardHeight - 52,
               boxShadow: theme.shadow.md,
               transition: "0.2s",
               "--joy-shadowRing": "inset 0 -5px 0 rgba(0 0 0 / 0.24)",
@@ -94,7 +116,7 @@ export const Ticket = ({ id, title, type, assignee, points }: TicketData) => {
                 "--joy-shadowRing": "0 0 #000",
               },
             })}
-            color={"primary"}
+            color={couldSwap ? "neutral" : "primary"}
           >
             <CardContent>
               <Typography component={"h3"} level={"title-lg"}>
