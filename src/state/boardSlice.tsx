@@ -5,6 +5,10 @@ import type { TicketData } from "../components/ticket";
 
 interface BoardState {
   tickets: TicketData[];
+  couldSwap: {
+    from: number;
+    to: number;
+  };
 }
 
 type MoveAction = {
@@ -12,7 +16,12 @@ type MoveAction = {
   offset: number;
 };
 
-const sampleItems: TicketData[] = [
+type SwapAction = {
+  from: number;
+  to: number;
+};
+
+const initialItems: TicketData[] = [
   {
     title: "Research Dependencies",
     id: 1,
@@ -33,8 +42,14 @@ const sampleItems: TicketData[] = [
   { title: "Fix Styling", id: 6, type: "defect", assignee: "Sarah", points: 2 },
 ];
 
+const initialSwap = {
+  from: -1,
+  to: -1,
+};
+
 const initialState: BoardState = {
-  tickets: sampleItems,
+  tickets: initialItems,
+  couldSwap: initialSwap,
 };
 
 const boardSlice = createSlice({
@@ -63,11 +78,19 @@ const boardSlice = createSlice({
         state.tickets.splice(start, 0, ticket);
       }
     },
+    updateSwap(state, action: PayloadAction<SwapAction>) {
+      state.couldSwap = action.payload;
+    },
+    didSwap(state) {
+      state.couldSwap = initialSwap;
+    },
   },
   selectors: {
     selectTickets: (state) => state.tickets,
+    selectCouldSwap: (state) => state.couldSwap,
   },
 });
 export const boardReducer = boardSlice.reducer;
-export const { shiftTicketUp, shiftTicketDown } = boardSlice.actions;
-export const { selectTickets } = boardSlice.selectors;
+export const { shiftTicketUp, shiftTicketDown, updateSwap, didSwap } =
+  boardSlice.actions;
+export const { selectTickets, selectCouldSwap } = boardSlice.selectors;

@@ -8,14 +8,21 @@ import Typography from "@mui/joy/Typography";
 import type { RefObject } from "react";
 import { useRef } from "react";
 import Draggable from "react-draggable";
+import { useSelector } from "react-redux";
 
-import { shiftTicketDown, shiftTicketUp } from "../../state";
+import {
+  didSwap,
+  selectCouldSwap,
+  shiftTicketDown,
+  shiftTicketUp,
+  updateSwap,
+} from "../../state";
 import { useAppDispatch } from "../../store";
 import type { FlavorEnum, TicketData } from "./index";
 
 type TicketProps = TicketData & {
-  couldSwap: boolean;
-  onCouldSwap: (offset: number) => void;
+  position: number;
+  length: number;
 };
 
 const TicketIcon = ({ type }: { type: FlavorEnum }) => {
@@ -45,17 +52,23 @@ export const Ticket = ({
   type,
   assignee,
   points,
-  couldSwap,
-  onCouldSwap,
+  position,
+  length,
 }: TicketProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
+  const { from, to } = useSelector(selectCouldSwap);
+  const couldSwap = from >= 0 && to >= 0;
+  const isSwappingDown = from < to;
+  const isSwapping =
+    couldSwap && isSwappingDown
+      ? position > from && position <= to
+      : position >= to && position < from;
   const cardHeight = 130;
 
   return (
     <>
       <Draggable
-        defaultPosition={{ x: 0, y: 0 }}
         position={{ x: 0, y: 0 }}
         axis="y"
         bounds="parent"
@@ -64,13 +77,19 @@ export const Ticket = ({
             ref.current.style.zIndex = "99";
             const offset = Math.round(Math.abs(y) / cardHeight);
             if (offset > 0) {
+              let toIndex = -1;
               if (y > 0) {
-                onCouldSwap(offset);
+                toIndex = Math.min(length, position + offset);
               } else {
-                onCouldSwap(-offset);
+                toIndex = Math.max(0, position - offset);
+              }
+              if (to !== toIndex) {
+                dispatch(updateSwap({ from: position, to: toIndex }));
               }
             } else {
-              onCouldSwap(0);
+              if (from !== -1 && to !== -1) {
+                dispatch(didSwap());
+              }
             }
           }
         }}
@@ -81,10 +100,14 @@ export const Ticket = ({
             if (offset > 0) {
               if (y > 0) {
                 dispatch(shiftTicketDown({ id, offset }));
-                onCouldSwap(0);
+                if (from !== -1 && to !== -1) {
+                  dispatch(didSwap());
+                }
               } else {
                 dispatch(shiftTicketUp({ id, offset }));
-                onCouldSwap(0);
+                if (from !== -1 && to !== -1) {
+                  dispatch(didSwap());
+                }
               }
             }
           }
@@ -102,7 +125,6 @@ export const Ticket = ({
               width: 300,
               height: cardHeight - 52,
               boxShadow: theme.shadow.md,
-              transition: "0.2s",
               "--joy-shadowRing": "inset 0 -5px 0 rgba(0 0 0 / 0.24)",
               "&:hover": {
                 cursor: "grab",
@@ -115,8 +137,16 @@ export const Ticket = ({
                 transform: "translateY(0px)",
                 "--joy-shadowRing": "0 0 #000",
               },
+              transition: couldSwap ? "300ms" : "0",
+              ...(isSwapping
+                ? {
+                    transform: `translateY(${
+                      isSwappingDown ? "-" : ""
+                    }${cardHeight}px)`,
+                  }
+                : { transform: `translateY(0px)` }),
             })}
-            color={couldSwap ? "neutral" : "primary"}
+            color={"primary"}
           >
             <CardContent>
               <Typography component={"h3"} level={"title-lg"}>
